@@ -1,0 +1,74 @@
+=====================================================================
+PROMPT - ETAPE 4 : INSERTION DES DONNEES (framework RICARDO)
+Domaine : NVIDIA Corporation - base nvidia_db
+=====================================================================
+
+[R - ROLE]
+Agis en tant que développeur SQL expert en MySQL 8, chargé de remplir une
+base de données de test réaliste pour NVIDIA.
+
+[I - INSTRUCTIONS]
+1. Lis attentivement le script de création des tables et le script de
+   contraintes fournis en référence.
+2. Génère les requêtes INSERT INTO dans l'ordre qui respecte les clés
+   étrangères : DIVISION, ARCHITECTURE, FONDERIE, TRIMESTRE, CLIENT,
+   PROJET_RD, EMPLOYE (les managers avant leurs subordonnés), PRODUIT,
+   REVISION, FABRIQUER, COMMANDE, CONTENIR, PARTICIPER.
+3. Donne les identifiants explicitement (pas de AUTO_INCREMENT implicite)
+   pour que les clés étrangères soient cohérentes.
+4. Vérifie chaque ligne par rapport aux contraintes CHECK, UNIQUE et
+   NOT NULL avant de l'écrire.
+
+[C - CONTEXTE]
+- 6 divisions : Data Center, Gaming, Professional Visualization,
+  Automotive, Robotique et Embarque, Reseau.
+- Architectures réelles de NVIDIA de Pascal (2016) à Rubin (2026).
+- Produits réels (GeForce RTX 30/40/50, A100, H100, H200, B200, GB200,
+  RTX 6000 Ada, DRIVE Orin/Thor, Jetson...) avec des prix de lancement et
+  des TDP proches de la réalité.
+- Fonderies : TSMC, Samsung Foundry, TSMC Arizona, Intel Foundry Services.
+- Clients réels : OEM (ASUS, Dell...), Cloud (AWS, Azure, OVHcloud...),
+  distributeurs (LDLC, Ingram Micro...), entreprises (constructeurs
+  automobiles, robotique, start-ups d'IA).
+- Les noms des employés sont fictifs.
+
+[A - CONTRAINTES ADDITIONNELLES]
+- Respecter toutes les contraintes du script 2_contraintes.sql : catégories
+  ('GPU','Accelerateur','SoC','Superpuce','Reseau'), types de client
+  ('OEM','Cloud','Distributeur','Entreprise'), statuts ('En attente',
+  'Validee','Expediee','Livree','Annulee'), rôles ('Chef de projet',
+  'Ingenieur','Chercheur','Testeur','Designer'), email employé au format
+  prenom.nom@nvidia.com, code de révision au format lettre + chiffre,
+  référence produit au format XX-XXXX, numéro de trimestre de 1 à 4,
+  date_fin >= date_debut, quantités et prix > 0.
+- Cohérence métier : une commande ne contient que des produits déjà sortis
+  à la date de commande ; une révision de puce est antérieure à la sortie
+  du produit ; un produit n'est fabriqué qu'à partir du trimestre de sa
+  sortie ; les clients Cloud achètent des produits Data Center, les
+  distributeurs des cartes Gaming, les constructeurs automobiles des SoC.
+- Prévoir volontairement quelques cas "vides" utiles pour les requêtes :
+  une architecture sans produit, une division sans produit, une fonderie
+  sans production, des clients sans commande, un projet sans participant.
+- Pas de texte avec accent dans les valeurs contraintes (statut, rôle...).
+- Aucune donnée personnelle réelle pour les employés.
+
+[R - REFERENCES]
+- Script 1_creation.sql (structure des tables)
+- Script 2_contraintes.sql (contraintes de validation)
+- Dictionnaire de données et règles métier du README.md
+- https://www.nvidia.com/fr-fr/geforce/graphics-cards/
+- https://www.nvidia.com/fr-fr/data-center/
+
+[D - RENDEMENT DESIRE]
+Un unique script SQL exécutable sous MySQL 8, commençant par
+"USE nvidia_db;", avec un commentaire avant chaque table et des INSERT
+multi-lignes. Volume attendu :
+DIVISION 6, ARCHITECTURE 9, FONDERIE 4, TRIMESTRE 15 (T1 2023 à T3 2026),
+CLIENT ~35, PROJET_RD ~12, EMPLOYE ~50, PRODUIT ~45, REVISION ~90,
+FABRIQUER ~350, COMMANDE ~150, CONTENIR ~350, PARTICIPER ~80.
+
+[O - OBJECTIFS]
+Obtenir un jeu de données réaliste, cohérent et suffisamment volumineux
+pour tester toutes les requêtes d'interrogation (sélections, agrégats,
+jointures internes et externes, sous-requêtes) sans aucune erreur
+d'intégrité à l'exécution.
