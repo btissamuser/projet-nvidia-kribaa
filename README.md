@@ -54,25 +54,45 @@ Dans MySQL Workbench : *File → Open SQL Script*, puis l'icône éclair pour ex
 
 ### Prompt utilisé
 
-Le prompt complet suit le framework **RICARDO** (Rôle, Instructions, Contexte, Contraintes additionnelles, Références, Rendement désiré, Objectifs). Il se trouve dans [`prompts/1_prompt_analyse_besoins.txt`](prompts/1_prompt_analyse_besoins.txt).
+Le prompt reprend **la base de prompt fournie** (`Mini_Projet_1_Base_Prompt.docx`) sans modifier sa structure ni retirer de partie. Seuls les champs `[A COMPLETER]` ont été remplis, et quelques précisions ont été ajoutées. Le prompt complet se trouve dans [`prompts/1_prompt_analyse_besoins.txt`](prompts/1_prompt_analyse_besoins.txt) :
 
-Éléments ajoutés à la base de prompt :
+> Tu travailles dans le domaine des semi-conducteurs et de l'informatique accélérée (processeurs graphiques et puces pour l'intelligence artificielle). Ton entreprise a comme activité de concevoir des puces (GPU, accélérateurs pour l'IA, systèmes sur puce pour l'automobile et la robotique), de faire fabriquer ces puces par des fonderies partenaires car elle ne possède pas d'usine, puis de les vendre à des clients professionnels (fabricants de cartes et d'ordinateurs, fournisseurs de cloud, distributeurs, constructeurs automobiles et entreprises). Elle mène aussi des projets de recherche et développement. C'est une entreprise comme NVIDIA, AMD ou Qualcomm, et plus précisément NVIDIA, organisée en divisions (Data Center, Gaming, Professional Visualization, Automotive, Robotique et Embarqué). Les données ont été collectées sur l'organisation interne (divisions, employés et leur hiérarchie), les produits et les architectures sur lesquelles ils reposent, les révisions successives des puces, la production confiée aux fonderies au fil des trimestres, les clients et leurs commandes, ainsi que les projets de recherche et développement et les employés qui y participent. Inspire-toi des sites web suivants : https://www.nvidia.com/fr-fr/ , https://investor.nvidia.com , https://www.nvidia.com/fr-fr/data-center/ , https://www.nvidia.com/fr-fr/geforce/graphics-cards/ et https://fr.wikipedia.org/wiki/Nvidia .
+>
+> Ton entreprise veut appliquer MERISE pour concevoir un système d'information. Tu es chargé de la partie analyse, c'est-à-dire de collecter les besoins auprès de l'entreprise. Elle a fait appel à un étudiant en ingénierie informatique pour réaliser ce projet, tu dois lui fournir les informations nécessaires pour qu'il applique ensuite lui-même les étapes suivantes de conception et développement de la base de données.
+>
+> D'abord, établis les règles de gestions des données de ton entreprise, sous la forme d'une liste à puce. Elle doit correspondre aux informations que fournit quelqu'un qui connaît le fonctionnement de l'entreprise, mais pas comment se construit un système d'information. Précise notamment qu'un employé peut avoir un manager qui est lui-même un employé, qu'une révision de puce (A0, A1, B0...) n'a de sens que pour le produit auquel elle appartient, et que la quantité produite et le coût de fabrication dépendent à la fois du produit, de la fonderie et du trimestre.
+>
+> Ensuite, à partir de ces règles, fournis un dictionnaire de données brutes avec les colonnes suivantes, regroupées dans un tableau : signification de la donnée, type, taille en nombre de caractères ou de chiffres. Il doit y avoir entre 25 et 35 données. Il sert à fournir des informations supplémentaires sur chaque donnée (taille et type) mais sans a priori sur comment les données vont être modélisées ensuite.
+>
+> Fournis donc les règles de gestion et le dictionnaire de données.
 
-- **Contexte** : NVIDIA ne possède pas d'usine et confie la fabrication à des fonderies (TSMC, Samsung). Ses produits reposent sur des architectures successives (Ampere, Hopper, Blackwell…). Ses clients sont des OEM, des fournisseurs de cloud, des distributeurs et des entreprises. Une puce passe par plusieurs révisions (*steppings*).
-- **Références** : site officiel de NVIDIA, site investisseurs, page des technologies, page Wikipédia.
-- **Contraintes** : entre 40 et 60 données, noms en minuscules sans accent, respect de la 3FN, modèle permettant une réflexive, une ternaire et une entité faible.
+Le tableau suivant indique ce qui a été ajouté à la base, selon le framework **RICARDO** :
 
-### Ajustements apportés au résultat
+| Lettre | Ce qui a été ajouté |
+|---|---|
+| R – Rôle | (base) analyste chargé de collecter les besoins de l'entreprise |
+| I – Instructions | (base) règles de gestion, puis dictionnaire. **Ajout :** préciser trois règles importantes (hiérarchie entre employés, révisions de puce, production par trimestre) |
+| C – Contexte | **Ajout :** domaine (semi-conducteurs), activité (conception de puces sans usine, ventes B2B, R&D), exemples (NVIDIA, AMD, Qualcomm), organisation en divisions, liste des sujets sur lesquels portent les données |
+| A – Contraintes | (base) entre 25 et 35 données, sans a priori de modélisation |
+| R – Références | **Ajout :** cinq liens (site NVIDIA, relations investisseurs, Data Center, GeForce, Wikipédia) |
+| D – Rendement désiré | (base) liste à puces, puis tableau signification / type / taille |
+| O – Objectifs | (base) fournir à l'étudiant les informations nécessaires à la conception |
 
-- Les données **calculables** ont été retirées pour respecter la 3FN : montant total d'une commande (somme des `quantite × prix_unitaire`), nombre d'employés d'une division, ancienneté d'un employé.
-- Le **prix de vente** (`prix_unitaire` dans une commande) est conservé séparément du **prix de lancement** du produit. Ce n'est pas une redondance : le prix négocié varie d'une commande à l'autre.
-- Les valeurs codées (catégorie, type de client, statut, rôle) sont écrites **sans accent** afin de simplifier les contraintes `CHECK` et les requêtes.
+### Analyse du résultat et modifications
 
-### Règles métier
+L'IAG (Claude) a renvoyé les règles de gestion et un dictionnaire de **35 données**, ce qui respecte la contrainte de 25 à 35 données. Le résultat est conforme au prompt. Les points suivants ont été relevés et corrigés lors de la modélisation :
+
+- **Identifiants** : le dictionnaire brut ne contient pas d'identifiants, ce qui est normal (« sans a priori sur la modélisation »). Ils ont été ajoutés dans le MCD : `id_division`, `id_employe`, `id_architecture`, `id_produit`, `id_fonderie`, `id_trimestre`, `id_client`, `id_commande`, `id_projet`.
+- **Données ajoutées** : le sujet autorise à compléter le dictionnaire. Six données ont été ajoutées pour enrichir le modèle, avec les règles correspondantes (marquées *ajoutée* ci-dessous) : `description` (division), `annee_lancement` et `gravure_nm` (architecture), `date_revision` et `description` (révision), `email_contact` (client).
+- **Données calculables** : aucune donnée calculable n'a été conservée, afin de respecter la 3FN. C'est le cas du montant total d'une commande (somme des `quantite × prix_unitaire`), de l'effectif d'une division et de l'ancienneté d'un employé.
+- **Deux prix** : le **prix de vente** (`prix_unitaire` dans une commande) est distinct du **prix de lancement** du produit, car le prix négocié varie d'une commande à l'autre. Ce n'est donc pas une redondance.
+- **Valeurs sans accent** : les valeurs codées (catégorie, type de client, statut, rôle) sont écrites sans accent afin de simplifier les contraintes `CHECK` et les requêtes.
+
+### Règles de gestion
 
 **Organisation**
 
-- **RG1** – Une division est identifiée par un numéro. Son nom est unique.
+- **RG1** – Une division est identifiée par un numéro. Son nom est unique. *(La description d'une division a été ajoutée.)*
 - **RG2** – Un employé appartient à une et une seule division. Une division compte zéro, un ou plusieurs employés.
 - **RG3** – L'email professionnel d'un employé est unique et respecte le format `prenom.nom@nvidia.com`.
 - **RG4** – Le salaire annuel brut d'un employé est compris entre 30 000 $ et 1 000 000 $.
@@ -83,12 +103,12 @@ Le prompt complet suit le framework **RICARDO** (Rôle, Instructions, Contexte, 
 **Produits**
 
 - **RG8** – Une architecture (Ampere, Hopper, Blackwell…) a un nom unique. Elle peut servir de base à zéro, un ou plusieurs produits.
-- **RG9** – La finesse de gravure d'une architecture est comprise entre 2 et 200 nm. Son année de lancement est comprise entre 1993 et 2030.
+- **RG9** *(ajoutée)* – La finesse de gravure d'une architecture est comprise entre 2 et 200 nm. Son année de lancement est comprise entre 1993 et 2030.
 - **RG10** – Un produit a une référence commerciale unique de la forme `XX-XXXX` (deux lettres majuscules, un tiret, des lettres ou des chiffres), par exemple `GF-4090`.
 - **RG11** – La catégorie d'un produit est l'une des valeurs suivantes : GPU, Accelerateur, SoC, Superpuce, Reseau.
 - **RG12** – Le prix de lancement est strictement positif. Le TDP (consommation) est compris entre 1 et 2000 W. La mémoire, si elle est renseignée, est positive ou nulle.
 - **RG13** – Un GPU ou un accélérateur possède obligatoirement de la mémoire (> 0 Go).
-- **RG14** – Une révision de puce est identifiée par son code (A0, A1, B0… : une lettre majuscule puis un chiffre) **relativement au produit** auquel elle appartient. Un produit a une ou plusieurs révisions. Une révision appartient à un seul produit.
+- **RG14** – Une révision de puce est identifiée par son code (A0, A1, B0… : une lettre majuscule puis un chiffre) **relativement au produit** auquel elle appartient. Un produit a une ou plusieurs révisions. Une révision appartient à un seul produit. *(La date et la description d'une révision ont été ajoutées.)*
 - **RG15** – Un produit repose sur une et une seule architecture. Il est géré par une et une seule division. Une division gère zéro, un ou plusieurs produits.
 
 **Production**
@@ -101,7 +121,7 @@ Le prompt complet suit le framework **RICARDO** (Rôle, Instructions, Contexte, 
 **Ventes**
 
 - **RG20** – Le type d'un client est l'un des suivants : OEM, Cloud, Distributeur, Entreprise.
-- **RG21** – L'email de contact d'un client contient un `@` suivi d'un nom de domaine.
+- **RG21** *(ajoutée)* – L'email de contact d'un client contient un `@` suivi d'un nom de domaine.
 - **RG22** – Le statut d'une commande est l'un des suivants : En attente, Validee, Expediee, Livree, Annulee. Une nouvelle commande est « En attente » par défaut.
 - **RG23** – Une commande est passée par un et un seul client. Un client passe zéro, une ou plusieurs commandes.
 - **RG24** – Une commande contient un ou plusieurs produits. Pour chaque produit commandé, on enregistre une quantité (≥ 1) et le prix unitaire négocié (> 0).
@@ -114,27 +134,69 @@ Le prompt complet suit le framework **RICARDO** (Rôle, Instructions, Contexte, 
 - **RG28** – Un employé participe à zéro, un ou plusieurs projets. Un projet compte zéro, un ou plusieurs participants. Pour chaque participation, on enregistre un rôle (Chef de projet, Ingenieur, Chercheur, Testeur, Designer).
 - **RG29** – Le nombre d'heures déclarées par un employé sur un projet est compris entre 0 et 2000. Il vaut 0 par défaut.
 
-### Dictionnaire de données
+### Dictionnaire de données renvoyé par l'IAG (35 données)
 
 Types : A = alphanumérique, N = numérique, D = date.
 
+| N° | Signification de la donnée | Type | Taille |
+|---|---|---|---|
+| 1 | Nom de la division | A | 50 |
+| 2 | Nom de l'employé | A | 50 |
+| 3 | Prénom de l'employé | A | 50 |
+| 4 | Email professionnel de l'employé | A | 100 |
+| 5 | Poste occupé par l'employé | A | 80 |
+| 6 | Date d'embauche de l'employé | D | 10 |
+| 7 | Salaire annuel brut de l'employé ($) | N | 10 (dont 2 décimales) |
+| 8 | Nom de l'architecture de puce | A | 50 |
+| 9 | Nom commercial du produit | A | 80 |
+| 10 | Référence commerciale du produit | A | 20 |
+| 11 | Catégorie du produit (GPU, Accelerateur, SoC, Superpuce, Reseau) | A | 20 |
+| 12 | Date de sortie du produit | D | 10 |
+| 13 | Prix de lancement du produit ($) | N | 10 (dont 2 décimales) |
+| 14 | Mémoire embarquée (Go) | N | 4 |
+| 15 | Consommation maximale TDP (W) | N | 4 |
+| 16 | Code de révision de la puce | A | 5 |
+| 17 | Nom de la fonderie | A | 50 |
+| 18 | Pays de la fonderie | A | 50 |
+| 19 | Année du trimestre de production | N | 4 |
+| 20 | Numéro du trimestre (1 à 4) | N | 1 |
+| 21 | Quantité produite sur le trimestre | N | 10 |
+| 22 | Coût unitaire de fabrication ($) | N | 10 (dont 2 décimales) |
+| 23 | Raison sociale du client | A | 100 |
+| 24 | Type de client (OEM, Cloud, Distributeur, Entreprise) | A | 20 |
+| 25 | Pays du client | A | 50 |
+| 26 | Date de la commande | D | 10 |
+| 27 | Statut de la commande | A | 20 |
+| 28 | Quantité commandée d'un produit | N | 10 |
+| 29 | Prix unitaire négocié ($) | N | 10 (dont 2 décimales) |
+| 30 | Nom du projet de R&D | A | 100 |
+| 31 | Budget du projet ($) | N | 14 (dont 2 décimales) |
+| 32 | Date de début du projet | D | 10 |
+| 33 | Date de fin du projet | D | 10 |
+| 34 | Rôle de l'employé dans le projet | A | 50 |
+| 35 | Heures passées par l'employé sur le projet | N | 4 |
+
+### Dictionnaire complet utilisé pour le MCD
+
+Ce dictionnaire contient les 35 données ci-dessus, les identifiants et les 6 données ajoutées. Les lignes en *italique* sont des ajouts au dictionnaire de l'IAG.
+
 | Code | Signification | Type | Taille | Remarque / contrainte |
 |---|---|---|---|---|
-| id_division | Identifiant de la division | N | | Identifiant |
+| *id_division* | Identifiant de la division | N | | Identifiant |
 | nom_division | Nom de la division | A | 50 | Unique (RG1) |
-| description | Description de la division | A | 255 | Facultatif |
-| id_employe | Identifiant de l'employé | N | | Identifiant |
+| *description* | Description de la division | A | 255 | Facultatif |
+| *id_employe* | Identifiant de l'employé | N | | Identifiant |
 | nom | Nom de famille de l'employé | A | 50 | Obligatoire |
 | prenom | Prénom de l'employé | A | 50 | Obligatoire |
 | email | Email professionnel | A | 100 | Unique, `prenom.nom@nvidia.com` (RG3) |
 | poste | Intitulé du poste | A | 80 | Obligatoire |
 | date_embauche | Date d'embauche | D | | ≥ 05/04/1993 (RG5) |
 | salaire | Salaire annuel brut en $ | N | 10,2 | 30 000 à 1 000 000 (RG4) |
-| id_architecture | Identifiant de l'architecture | N | | Identifiant |
+| *id_architecture* | Identifiant de l'architecture | N | | Identifiant |
 | nom_architecture | Nom de l'architecture | A | 50 | Unique (RG8) |
-| annee_lancement | Année de lancement de l'architecture | N | 4 | 1993 à 2030 (RG9) |
-| gravure_nm | Finesse de gravure en nanomètres | N | 3 | 2 à 200 (RG9) |
-| id_produit | Identifiant du produit | N | | Identifiant |
+| *annee_lancement* | Année de lancement de l'architecture | N | 4 | 1993 à 2030 (RG9) |
+| *gravure_nm* | Finesse de gravure en nanomètres | N | 3 | 2 à 200 (RG9) |
+| *id_produit* | Identifiant du produit | N | | Identifiant |
 | nom_produit | Nom commercial du produit | A | 80 | Obligatoire |
 | reference | Référence commerciale | A | 20 | Unique, format `XX-XXXX` (RG10) |
 | categorie | Catégorie du produit | A | 20 | Liste de valeurs (RG11) |
@@ -143,27 +205,27 @@ Types : A = alphanumérique, N = numérique, D = date.
 | memoire_go | Mémoire embarquée en Go | N | 4 | ≥ 0, obligatoire pour GPU et accélérateurs (RG13) |
 | tdp_watts | Consommation maximale en watts | N | 4 | 1 à 2000 (RG12) |
 | code_revision | Code de révision de la puce | A | 5 | Lettre + chiffre, identifiant relatif au produit (RG14) |
-| date_revision | Date de la révision | D | | Obligatoire |
-| description (révision) | Description de la révision | A | 255 | Facultatif |
-| id_fonderie | Identifiant de la fonderie | N | | Identifiant |
+| *date_revision* | Date de la révision | D | | Obligatoire |
+| *description (révision)* | Description de la révision | A | 255 | Facultatif |
+| *id_fonderie* | Identifiant de la fonderie | N | | Identifiant |
 | nom_fonderie | Nom de la fonderie | A | 50 | Unique (RG16) |
 | pays (fonderie) | Pays de la fonderie | A | 50 | Obligatoire |
-| id_trimestre | Identifiant du trimestre | N | | Identifiant |
+| *id_trimestre* | Identifiant du trimestre | N | | Identifiant |
 | annee | Année du trimestre | N | 4 | (annee, numero_trimestre) unique (RG17) |
 | numero_trimestre | Numéro du trimestre | N | 1 | 1 à 4 (RG17) |
 | quantite_produite | Unités fabriquées (produit, fonderie, trimestre) | N | | > 0 (RG19) |
 | cout_unitaire | Coût de fabrication d'une unité en $ | N | 10,2 | > 0 (RG19) |
-| id_client | Identifiant du client | N | | Identifiant |
+| *id_client* | Identifiant du client | N | | Identifiant |
 | raison_sociale | Nom de l'entreprise cliente | A | 100 | Obligatoire |
 | type_client | Type de client | A | 20 | Liste de valeurs (RG20) |
 | pays (client) | Pays du client | A | 50 | Obligatoire |
-| email_contact | Email du service achats du client | A | 100 | Contient `@` et un domaine (RG21) |
-| id_commande | Identifiant de la commande | N | | Identifiant |
+| *email_contact* | Email du service achats du client | A | 100 | Contient `@` et un domaine (RG21) |
+| *id_commande* | Identifiant de la commande | N | | Identifiant |
 | date_commande | Date de la commande | D | | Obligatoire |
 | statut | Statut de la commande | A | 20 | Liste de valeurs, défaut « En attente » (RG22) |
 | quantite | Quantité d'un produit dans une commande | N | | ≥ 1 (RG24) |
 | prix_unitaire | Prix unitaire négocié en $ | N | 10,2 | > 0 (RG24) |
-| id_projet | Identifiant du projet de R&D | N | | Identifiant |
+| *id_projet* | Identifiant du projet de R&D | N | | Identifiant |
 | nom_projet | Nom du projet | A | 100 | Obligatoire |
 | budget | Budget du projet en $ | N | 14,2 | > 0 (RG27) |
 | date_debut | Date de début du projet | D | | Obligatoire |
