@@ -177,7 +177,9 @@ Types : A = alphanumérique, N = numérique, D = date.
 
 ![MCD de la base NVIDIA](mcd/mcd.png)
 
-Le fichier source du MCD (Looping) est [`mcd/mcd.loo`](mcd/mcd.loo).
+Image exportée depuis **Looping**. Le fichier source est [`mcd/mcd.loo`](mcd/mcd.loo).
+
+> Looping impose des noms de rubriques uniques dans tout le modèle. Dans le MCD, `pays` du client est donc nommé `pays_client` et `description` de la révision `description_revision`. Dans le MPD, ces colonnes restent `pays` et `description`, car elles sont dans des tables différentes.
 
 ### Éléments de modélisation avancée
 
